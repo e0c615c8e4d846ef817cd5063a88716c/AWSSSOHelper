@@ -13,8 +13,8 @@ Main usability enhancement compared to aws cli 2 is the abillity to specify the 
 .EXAMPLE
     Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -AllAccountRoles
 .EXAMPLE
-    $RoleCredentials = Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start"
-    Get-S3Bucket -AccessKey $RoleCredentials.AccessKey -SecretKey $RoleCredentials.SecretKey -SessionToken $RoleCredentials.SessionToken
+    $RoleCredentials = Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -PassThru
+    Get-S3Bucket @RoleCredentials
 .EXAMPLE
     $AllRoleCredentials = Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -AllAccountRoles
     $AllRoleCredentials | Foreach-Object { Get-S3Bucket -AccessKey $_.AccessKey -SecretKey $_.SecretKey -SessionToken $_.SessionToken }
@@ -181,7 +181,16 @@ function GetAccountRoleCredential {
     }
 
     if ($PassThru) {
-        return $Credentials | Select-Object AccessKey,SecretKey,SessionToken
+        $return = @()
+        foreach ($item in $Credentials) {
+            $return += @{
+                AccessKey = $item.AccessKey
+                SecretKey = $item.SecretKey
+                SessionToken = $item.SessionToken
+            }
+        }
+        return $return
+        # return $Credentials | Select-Object AccessKey,SecretKey,SessionToken
     }
 
     return $Credentials
