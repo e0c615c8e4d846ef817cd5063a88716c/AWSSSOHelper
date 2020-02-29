@@ -38,14 +38,13 @@ function Get-AWSSSORoleCredential {
         [string]$AccountId,
         [string]$RoleName,
         [switch]$AllAccountRoles,
+        [switch]$RefreshAccessToken,
+        [string]$Region,
+        [switch]$PassThru,
         [string]$ClientName = "default",
         [ValidateSet('public')][string]$ClientType = "public",
         [int]$TimeoutInSeconds = 120,
-        [string]$Path = (Join-Path $Home ".awsssohelper"),
-        [string]$Region,
-        [switch]$PassThru,
-        [switch]$RefreshAccessToken,
-        [string]$SetDefaultRegion
+        [string]$Path = (Join-Path $Home ".awsssohelper")
     )
 
     try {
@@ -55,14 +54,15 @@ function Get-AWSSSORoleCredential {
         Import-Module AWSPowerShell.NetCore
     }
 
-    if ($SetDefaultRegion) {
-        Set-DefaultAWSRegion $SetDefaultRegion
+    if ($Region) {
+        Set-DefaultAWSRegion $Region
     }
     elseif (($null -eq (Get-DefaultAWSRegion).Region)) {
-        throw "No default AWS region configured, configure defaults using 'Set-DefaultAWSRegion'."
+        throw "No default AWS region configured, specify '-Region <region>' parameter or configure defaults using 'Set-DefaultAWSRegion'."
     }
-
-    $Region = (Get-DefaultAWSRegion).Region
+    else {
+        $Region = (Get-DefaultAWSRegion).Region
+    }
 
     $CachePath = Join-Path $Path $ClientName
 
@@ -111,7 +111,7 @@ function Get-AWSSSORoleCredential {
         
         while (!$AccessToken -and ((New-TimeSpan $SSOStart (Get-Date)).TotalSeconds -lt $TimeoutInSeconds)) {
             try {
-                $AccessToken = New-SSOOIDCToken -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -Code $DeviceAuth.Code -DeviceCode $DeviceAuth.DeviceCode -GrantType "urn:ietf:params:oauth:grant-type:device_code" -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Region $Region
+                $AccessToken = New-SSOOIDCToken -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -Code $DeviceAuth.Code -DeviceCode $DeviceAuth.DeviceCode -GrantType "urn:ietf:params:oauth:grant-type:device_code" -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
             }
             catch {
                 Write-Host $_.Exception.GetType().FullName, $_.Exception.Message

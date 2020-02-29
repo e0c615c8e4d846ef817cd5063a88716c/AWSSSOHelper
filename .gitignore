@@ -1,2 +1,3 @@
-build/
+build/build.ps1
+build/reset_github.sh
 .vscode/settings.json
