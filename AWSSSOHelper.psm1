@@ -40,19 +40,29 @@ function Get-AWSSSORoleCredential {
         [switch]$AllAccountRoles,
         [string]$ClientName = "default",
         [ValidateSet('public')][string]$ClientType = "public",
-        [int]$TimeoutInSeconds = 60,
+        [int]$TimeoutInSeconds = 120,
         [string]$Path = (Join-Path $Home ".awsssohelper"),
         [string]$Region,
         [switch]$PassThru,
-        [switch]$RefreshAccessToken
+        [switch]$RefreshAccessToken,
+        [string]$SetDefaultRegion
     )
 
-    if (($null -eq (Get-DefaultAWSRegion).Region)) {
+    try {
+        Get-DefaultAWSRegion
+    }
+    catch {
+        Import-Module AWSPowerShell.NetCore
+    }
+
+    if ($SetDefaultRegion) {
+        Set-DefaultAWSRegion $SetDefaultRegion
+    }
+    elseif (($null -eq (Get-DefaultAWSRegion).Region)) {
         throw "No default AWS region configured, configure defaults using 'Set-DefaultAWSRegion'."
     }
-    else {
-        $Region = (Get-DefaultAWSRegion).Region
-    }
+
+    $Region = (Get-DefaultAWSRegion).Region
 
     $CachePath = Join-Path $Path $ClientName
 
@@ -62,6 +72,13 @@ function Get-AWSSSORoleCredential {
 
     if (Test-Path $CachePath) {
         $AccessToken = Get-Content $CachePath -ErrorAction SilentlyContinue | ConvertFrom-Json
+        try {
+            Get-SSOAccountList -AccessToken $AccessToken.AccessToken  -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) | Out-Null
+        }
+        catch {
+            Write-Host "Cached access token is no longer valid, will need to obtain via SSO."
+            $RefreshAccessToken = $true
+        }
     }
 
     if (!$AccessToken) {
@@ -97,11 +114,12 @@ function Get-AWSSSORoleCredential {
                 $AccessToken = New-SSOOIDCToken -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -Code $DeviceAuth.Code -DeviceCode $DeviceAuth.DeviceCode -GrantType "urn:ietf:params:oauth:grant-type:device_code" -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Region $Region
             }
             catch {
+                Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
                 Start-Sleep -Seconds 5
             }
         }
         if (!$AccessToken) {
-            throw 'No Access Token obtained.'
+            throw 'No access token obtained, exiting.'
         }
         
         $AccessToken | ConvertTo-Json | Set-Content $CachePath
@@ -109,7 +127,12 @@ function Get-AWSSSORoleCredential {
     }
 
     if (!$AccountId) {
-        $AWSAccounts = Get-SSOAccountList -AccessToken $AccessToken.AccessToken  -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
+        try {
+            $AWSAccounts = Get-SSOAccountList -AccessToken $AccessToken.AccessToken  -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
+        }
+        catch {
+            throw "Error obtaining account list, access token is invalid.  Try running the command again with '-RefreshAccessToken' parameter."
+        }
         if (!$AllAccountRoles) {
             $AccountId = ($AWSAccounts | Sort-Object AccountName | Out-GridView -PassThru -Title "Select AWS Account" | Select-Object -First 1).AccountId
         }
@@ -118,7 +141,7 @@ function Get-AWSSSORoleCredential {
         }
     }
 
-    GetAccountRoleCredential -AccountId $AccountId -AccessToken $AccessToken.AccessToken -RoleName $RoleName
+    GetAccountRoleCredential -AccountId $AccountId -AccessToken $AccessToken.AccessToken -RoleName $RoleName -AllAccountRoles:$AllAccountRoles
 
 }
 
@@ -127,7 +150,8 @@ function GetAccountRoleCredential {
         [string[]]$AccountId,
         [string]$AccessToken,
         [string]$RoleName,
-        [string]$Region
+        [string]$Region,
+        [switch]$AllAccountRoles
     )
 
     $Credentials = @()

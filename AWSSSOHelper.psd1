@@ -12,12 +12,12 @@
 RootModule = 'AWSSSOHelper.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.13'
+ModuleVersion = '0.0.16'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
 
-# ID used to uniquely identify this module
+# ID used to uniquely identify this module>
 GUID = '4116f348-ea11-47fb-95ec-a624dcf70754'
 
 # Author of this module
@@ -30,7 +30,11 @@ CompanyName = 'Unknown'
 Copyright = '(c) e0c615c8e4d846ef817cd5063a88716c. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Simple helper module to access AWS credentials via AWS SSO`r`n`r`nhttps://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper'
+Description = @'
+Simple helper module to access AWS credentials via AWS SSO
+
+https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper
+'@
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '6.0'
