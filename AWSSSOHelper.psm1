@@ -86,6 +86,7 @@ function Get-AWSSSORoleCredential {
     }
     elseif ((New-TimeSpan $AccessToken.LoggedAt (Get-Date)).TotalMinutes -gt $AccessToken.ExpiresIn) {
         $RefreshAccessToken = $true
+        Clear-Variable AccessToken
     }
 
     if ($RefreshAccessToken) {
@@ -114,7 +115,7 @@ function Get-AWSSSORoleCredential {
                 $AccessToken = New-SSOOIDCToken -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -Code $DeviceAuth.Code -DeviceCode $DeviceAuth.DeviceCode -GrantType "urn:ietf:params:oauth:grant-type:device_code" -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
             }
             catch {
-                Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
+                # Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
                 Start-Sleep -Seconds 5
             }
         }
@@ -134,7 +135,7 @@ function Get-AWSSSORoleCredential {
             throw "Error obtaining account list, access token is invalid.  Try running the command again with '-RefreshAccessToken' parameter."
         }
         if (!$AllAccountRoles) {
-            $AccountId = ($AWSAccounts | Sort-Object AccountName | Out-GridView -PassThru -Title "Select AWS Account" | Select-Object -First 1).AccountId
+            $AccountId = ($AWSAccounts | Sort-Object AccountName | Out-GridView -PassThru -Title "Select AWS Account").AccountId
         }
         else {
             $AccountId = $AWSAccounts | Select-Object -ExpandProperty AccountId
@@ -160,22 +161,30 @@ function GetAccountRoleCredential {
         if (!$RoleName) {
             $SSORoles = Get-SSOAccountRoleList -AccessToken $AccessToken -AccountId $Id -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
             if ($SSORoles.Count -eq 1) {
-                $RoleName = ($SSORoles | Select-Object -First 1).RoleName
+                $AccountRoles = ($SSORoles | Select-Object -First 1).RoleName
+            }
+            elseif (!$AllAccountRoles) {
+                $AccountRoles = ($SSORoles | Out-GridView -PassThru -Title "Select AWS SSO Role").RoleName
             }
             else {
-                $RoleName = ($SSORoles | Out-GridView -PassThru -Title "Select AWS SSO Role" | Select-Object -First 1).RoleName
+                $AccountRoles = $SSORoles.RoleName
             }
         }
-    
-        $SSORoleCredential = Get-SSORoleCredential -AccessToken $AccessToken -AccountId $Id -RoleName $RoleName -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
-    
-        $Credentials += [pscustomobject][ordered]@{
-            AccountId = $Id;
-            RoleName = $RoleName;
-            AccessKey = $SSORoleCredential.AccessKeyId;
-            Expiration = $SSORoleCredential.Expiration;
-            SecretKey = $SSORoleCredential.SecretAccessKey;
-            SessionToken = $SSORoleCredential.SessionToken
+        else {
+            $AccountRoles = $RoleName
+        }
+        
+        foreach ($role in ($AccountRoles -split ' ')) {
+            $SSORoleCredential = Get-SSORoleCredential -AccessToken $AccessToken -AccountId $Id -RoleName $role -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
+        
+            $Credentials += [pscustomobject][ordered]@{
+                AccountId = $Id;
+                RoleName = $role;
+                AccessKey = $SSORoleCredential.AccessKeyId;
+                Expiration = $SSORoleCredential.Expiration;
+                SecretKey = $SSORoleCredential.SecretAccessKey;
+                SessionToken = $SSORoleCredential.SessionToken
+            }
         }
     
     }
