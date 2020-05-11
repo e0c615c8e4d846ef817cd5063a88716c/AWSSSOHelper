@@ -6,8 +6,8 @@ Main usability improvement compared to aws cli is the abillity to specify the -A
 
 A basic set of functionality is included, potential future enhancements could be:
 
-- Additional logic to identify expired Session Tokens and automatically renew (safest for now is to renew ahead of any command execution)
-- Improved support for systems without GUI
+- Additional logic to identify expired Session Tokens and automatically renew (safest for now is to renew ahead of any command execution) **Done**
+- Improved support for systems without GUI **Done**
 - Usage of aws cli credential cache
 - Support for PowerShell 5.1
 - Error handling
