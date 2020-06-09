@@ -44,7 +44,7 @@ function Get-AWSSSORoleCredential {
         [string]$Path = (Join-Path $Home ".awsssohelper")
     )
 
-    # Manually import the AWSPowerShell module if present as it is not configured for auto-loading
+    # Manually import the AWSPowerShell.NetCore module if present as it is not configured for auto-loading
     if ($PSVersionTable.PSEdition -ne 'Core') {
         $awsPowerShellModuleName = 'AWSPowerShell'
     }
@@ -52,7 +52,7 @@ function Get-AWSSSORoleCredential {
         $awsPowerShellModuleName = 'AWSPowerShell.NetCore'
     }
 
-    if ((Get-Module -Name $awsPowerShellModuleName -ListAvailable).Count -gt 0)
+    if (Get-Module -Name $awsPowerShellModuleName -ListAvailable)
     {
         Import-Module -Name $awsPowerShellModuleName
     }
@@ -118,6 +118,7 @@ function Get-AWSSSORoleCredential {
                 $AccessToken = New-SSOOIDCToken -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -Code $DeviceAuth.Code -DeviceCode $DeviceAuth.DeviceCode -GrantType "urn:ietf:params:oauth:grant-type:device_code" -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
             }
             catch {
+                # Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
                 Start-Sleep -Seconds 5
             }
         }
@@ -202,9 +203,8 @@ function GetAccountRoleCredential {
             }
         }
         return $return
+        # return $Credentials | Select-Object AccessKey,SecretKey,SessionToken
     }
 
     return $Credentials
 }
-
-Export-ModuleMember -Function 'Get-AWSSSORoleCredential'
