@@ -9,20 +9,26 @@ A basic set of functionality is included, potential future enhancements could be
 - Additional logic to identify expired Session Tokens and automatically renew (safest for now is to renew ahead of any command execution) - **Done**
 - Improved support for systems without GUI - **Done**
 - Usage of aws cli credential cache
-- Support for PowerShell 5.1
+- Support for PowerShell 5.1 - **Done**
 - Error handling
 - ...
 
 ## Pre-requisites
 
-- PowerShell Core
+- PowerShell 5.1 or Core
 - Default AWS Region configured (Set-DefaultAWSRegion)
-- Either the AWS PowerShell.NetCore or the required AWS.Tools PowerShell modules installed. See [What are the AWS Tools for PowerShell?](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-welcome.html) for information on the differences in the modules.
+- Either the `AWSPowerShell`, `AWS PowerShell.NetCore` or the required `AWS.Tools` PowerShell modules installed. See [What are the AWS Tools for PowerShell?](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-welcome.html) for information on the differences in the modules.
 
-#### Install AWS PowerShell.NetCore Module
+#### Install AWS PowerShell.NetCore Module (for PowerShell Core)
 
 ```powershell
 Install-Module AWSPowerShell.NetCore -Force
+```
+
+#### Install AWS PowerShell Module (for PowerShell 5.1)
+
+```powershell
+Install-Module AWSPowerShell -Force
 ```
 
 #### Install AWS Tools Modules
