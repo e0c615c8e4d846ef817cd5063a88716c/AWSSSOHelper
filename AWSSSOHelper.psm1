@@ -46,6 +46,13 @@ function Get-AWSSSORoleCredential {
         [string]$Path = (Join-Path $Home ".awsssohelper")
     )
 
+    # Manually import the AWSPowerShell.NetCore module if present as it is not configured for auto-loading
+    $awsNetCorePowerShellModuleName = 'AWSPowerShell.NetCore'
+    if (Get-Module -Name $awsNetCorePowerShellModuleName -ListAvailable)
+    {
+        Import-Module -Name $awsNetCorePowerShellModuleName
+    }
+
     if ($Region) {
         Set-DefaultAWSRegion $Region
     }
