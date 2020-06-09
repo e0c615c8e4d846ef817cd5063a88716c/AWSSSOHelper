@@ -15,7 +15,7 @@ RootModule = 'AWSSSOHelper.psm1'
 ModuleVersion = '0.0.21'
 
 # Supported PSEditions
-CompatiblePSEditions = @('Core')
+CompatiblePSEditions = @('Core','Desktop')
 
 # ID used to uniquely identify this module>
 GUID = '4116f348-ea11-47fb-95ec-a624dcf70754'
@@ -37,7 +37,7 @@ https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper
 '@
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '6.0'
+PowerShellVersion = '5.1'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
