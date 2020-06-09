@@ -19,13 +19,13 @@ A basic set of functionality is included, potential future enhancements could be
 - Default AWS Region configured (Set-DefaultAWSRegion)
 - Either the AWS PowerShell.NetCore or the required AWS.Tools PowerShell modules installed. See [What are the AWS Tools for PowerShell?](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-welcome.html) for information on the differences in the modules.
 
-### Install AWS PowerShell.NetCore Module
+#### Install AWS PowerShell.NetCore Module
 
 ```powershell
 Install-Module AWSPowerShell.NetCore -Force
 ```
 
-### Install AWS Tools Modules
+#### Install AWS Tools Modules
 
 ```powershell
 Install-Module AWS.Tools.Common, AWS.Tools.SSO, AWS.Tools.SSOOIDC -Force
