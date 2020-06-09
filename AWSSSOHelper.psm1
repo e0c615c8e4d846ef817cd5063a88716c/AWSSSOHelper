@@ -1,5 +1,4 @@
 #Requires -PSEdition Core
-#Requires -Module AWSPowerShell.NetCore
 
 <#
 .SYNOPSIS
@@ -46,13 +45,6 @@ function Get-AWSSSORoleCredential {
         [int]$TimeoutInSeconds = 120,
         [string]$Path = (Join-Path $Home ".awsssohelper")
     )
-
-    try {
-        Get-DefaultAWSRegion
-    }
-    catch {
-        Import-Module AWSPowerShell.NetCore
-    }
 
     if ($Region) {
         Set-DefaultAWSRegion $Region
