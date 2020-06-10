@@ -99,13 +99,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('AWS', 'SSO')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper/blob/master/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper'
 
         # A URL to an icon representing this module.
         # IconUri = ''
