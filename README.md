@@ -17,20 +17,37 @@ A basic set of functionality is included, potential future enhancements could be
 
 - PowerShell Core
 - Default AWS Region configured (Set-DefaultAWSRegion)
+- Either the AWS PowerShell.NetCore or the required AWS.Tools PowerShell modules installed. See [What are the AWS Tools for PowerShell?](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-welcome.html) for information on the differences in the modules.
+
+#### Install AWS PowerShell.NetCore Module
+
+```powershell
+Install-Module AWSPowerShell.NetCore -Force
+```
+
+#### Install AWS Tools Modules
+
+```powershell
+Install-Module AWS.Tools.Common, AWS.Tools.SSO, AWS.Tools.SSOOIDC -Force
+```
 
 ## Installation
 
-    Install-Module AWSSSOHelper -Force
+```powershell
+Install-Module AWSSSOHelper -Force
+```
 
 ## Usage
 
-    .EXAMPLE
-        Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start"
-    .EXAMPLE
-        Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -AllAccountRoles
-    .EXAMPLE
-        $RoleCredentials = Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -PassThru
-        Get-S3Bucket @RoleCredentials
-    .EXAMPLE
-        $AllRoleCredentials = Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -AllAccountRoles
-        $AllRoleCredentials | Foreach-Object { Get-S3Bucket -AccessKey $_.AccessKey -SecretKey $_.SecretKey -SessionToken $_.SessionToken }
+```powershell
+.EXAMPLE
+    Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start"
+.EXAMPLE
+    Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -AllAccountRoles
+.EXAMPLE
+    $RoleCredentials = Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -PassThru
+    Get-S3Bucket @RoleCredentials
+.EXAMPLE
+    $AllRoleCredentials = Get-AWSSSORoleCredential -StartUrl "https://mycompany.awsapps.com/start" -AllAccountRoles
+    $AllRoleCredentials | Foreach-Object { Get-S3Bucket -AccessKey $_.AccessKey -SecretKey $_.SecretKey -SessionToken $_.SessionToken }
+```
