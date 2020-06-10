@@ -381,12 +381,17 @@ function GetAccountRoleCredential {
         $SSORoleCredential = Get-SSORoleCredential -AccessToken $AccessToken -AccountId $AccountId -RoleName $role `
             -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
     
+        $SSOAccountName = (Get-SSOAccountList -AccessToken $AccessToken `
+            -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false |
+                Where-Object -Property AccountId -EQ $AccountID).AccountName
+
         $Credentials += [pscustomobject][ordered]@{
-            AccountId    = $AccountId;
-            RoleName     = $role;
-            AccessKey    = $SSORoleCredential.AccessKeyId;
-            Expiration   = $SSORoleCredential.Expiration;
-            SecretKey    = $SSORoleCredential.SecretAccessKey;
+            AccountId    = $AccountId
+            AccountName  = $SSOAccountName
+            RoleName     = $role
+            AccessKey    = $SSORoleCredential.AccessKeyId
+            Expiration   = $SSORoleCredential.Expiration
+            SecretKey    = $SSORoleCredential.SecretAccessKey
             SessionToken = $SSORoleCredential.SessionToken
         }
     }
