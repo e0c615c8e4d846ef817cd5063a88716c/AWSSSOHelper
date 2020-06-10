@@ -48,7 +48,7 @@ function Get-AWSSSORoleCredential {
 
     # Manually import the AWSPowerShell.NetCore module if present as it is not configured for auto-loading
     $awsNetCorePowerShellModuleName = 'AWSPowerShell.NetCore'
-    if (Get-Module -Name $awsNetCorePowerShellModuleName -ListAvailable)
+    if ((Get-Module -Name $awsNetCorePowerShellModuleName -ListAvailable).Count -gt 0)
     {
         Import-Module -Name $awsNetCorePowerShellModuleName
     }
