@@ -118,7 +118,6 @@ function Get-AWSSSORoleCredential {
                 $AccessToken = New-SSOOIDCToken -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -Code $DeviceAuth.Code -DeviceCode $DeviceAuth.DeviceCode -GrantType "urn:ietf:params:oauth:grant-type:device_code" -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
             }
             catch {
-                # Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
                 Start-Sleep -Seconds 5
             }
         }
@@ -203,7 +202,6 @@ function GetAccountRoleCredential {
             }
         }
         return $return
-        # return $Credentials | Select-Object AccessKey,SecretKey,SessionToken
     }
 
     return $Credentials
