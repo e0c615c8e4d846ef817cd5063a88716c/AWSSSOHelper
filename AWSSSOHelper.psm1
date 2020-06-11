@@ -20,6 +20,8 @@
     If specified, credentials for all roles and accounts will be obtained.
 .PARAMETER ClientName
     The friendly name for the SSO OIDC Client.
+.PARAMETER ClientType
+    The SSO OIDC Client type. This is currently fixed with a value of 'Public'.
 .PARAMETER RefreshAccessToken
     If specified, the SSO access token will be refreshed.
 .PARAMETER Region
@@ -137,7 +139,9 @@ function Get-AWSSSORoleCredential {
         [switch]$PassThru,
 
         [Parameter()]
-        [string]$ClientName = "default",
+        [Parameter()]
+        [ValidateSet('Public')]
+        [string]$ClientType = 'Public',
 
         [Parameter()]
         [int]$TimeoutInSeconds = 120,
@@ -218,7 +222,7 @@ function Get-AWSSSORoleCredential {
 
     if ($RefreshAccessToken) {
 
-        $Client = Register-SSOOIDCClient -ClientName $ClientName -ClientType 'Public' `
+        $Client = Register-SSOOIDCClient -ClientName $ClientName -ClientType $ClientType `
             -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
         $DeviceAuth = Start-SSOOIDCDeviceAuthorization -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret `
             -StartUrl $StartUrl -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
