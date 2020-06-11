@@ -112,12 +112,14 @@ function Get-AWSSSORoleCredential {
         [Parameter(ParameterSetName = 'OutputAwsCredential')]
         [Parameter(ParameterSetName = 'UseStoredAwsCredentials')]
         [Parameter(ParameterSetName = 'UseProfile')]
+        [Parameter(ParameterSetName = 'OutputEnvVariables')]
         [string]$AccountId,
 
         [Parameter(ParameterSetName = 'OutputPSObject')]
         [Parameter(ParameterSetName = 'OutputAwsCredential')]
         [Parameter(ParameterSetName = 'UseStoredAwsCredentials')]
         [Parameter(ParameterSetName = 'UseProfile')]
+        [Parameter(ParameterSetName = 'OutputEnvVariables')]
         [string]$RoleName,
 
         [Parameter(ParameterSetName = 'OutputPSObject')]
@@ -155,7 +157,8 @@ function Get-AWSSSORoleCredential {
         [Switch]$UseCliCredentialFile,
 
         [Parameter(ParameterSetName = 'UseProfile')]
-        [String]$ProfileLocation = "$HOME\.aws\credentials"
+        [Parameter(ParameterSetName = 'OutputEnvVariables')]
+        [switch]$OutputEnvVariables
     )
 
     # Manually import the AWSPowerShell.NetCore module if present as it is not configured for auto-loading
@@ -340,6 +343,12 @@ function Get-AWSSSORoleCredential {
                     Verbose      = $false
                 }
                 Set-AWSCredential @setAwsCredentialParms
+            }
+            elseif ($OutputEnvVariables) {
+                Write-Verbose -Message 'Outputting the credentials as the AWS environment variables'
+                $env:AWS_ACCESS_KEY_ID = $credential.AccessKey
+                $env:AWS_SECRET_ACCESS_KEY = $credential.SecretKey
+                $env:AWS_SESSION_TOKEN = $credential.SessionToken
             }
             else {
                 Write-Verbose -Message "Returning the Credentials as a PSCustomObject"
