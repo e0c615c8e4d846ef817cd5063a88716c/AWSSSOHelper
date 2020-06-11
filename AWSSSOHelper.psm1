@@ -264,15 +264,16 @@ function Get-AWSSSORoleCredential {
 
     }
 
-    if (!$AccountId) {
         try {
-            $AWSAccounts = Get-SSOAccountList -AccessToken $AccessToken.AccessToken `
+        $awsAccounts = Get-SSOAccountList -AccessToken $AccessToken.AccessToken `
                 -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
         }
         catch {
             throw ("Error obtaining account list, access token is invalid.  Try running the command again with " +
                 "'-RefreshAccessToken' parameter.")
         }
+
+    if (!$AccountId) {
         if (!$AllAccountRoles) {
             $outGridViewParms = @{ }
             if ($UseStoredAwsCredentials) {
@@ -284,18 +285,18 @@ function Get-AWSSSORoleCredential {
                 $outGridViewParms.OutputMode = 'Multiple'
             }
 
-            $AccountIds = ($AWSAccounts | Sort-Object AccountName | Out-GridView @outGridViewParms).AccountId
+            $accounts = $awsAccounts | Sort-Object AccountName | Out-GridView @outGridViewParms
         }
         else {
-            $AccountIds = $AWSAccounts | Select-Object -ExpandProperty AccountId
+            $accounts = $awsAccounts
         }
     }
     else {
-        $AccountIds = $AccountId
+        $accounts = $awsAccounts | Where-Object -Property AccountId -EQ $AccountId
     }
-    Write-Verbose "AccountId count: $($AccountIds.Count)"
-    foreach ($accountId in $AccountIds) {
-        $credentials = GetAccountRoleCredential -AccountId $accountId -AccessToken $AccessToken.AccessToken `
+
+    foreach ($account in $accounts) {
+        $credentials = GetAccountRoleCredential -AccountId $account.AccountId -AccessToken $AccessToken.AccessToken `
             -RoleName $RoleName -AllAccountRoles:$AllAccountRoles
 
         if ($UseProfile) {
@@ -320,7 +321,7 @@ function Get-AWSSSORoleCredential {
                     -SessionToken $credential.SessionToken -Verbose:$false
             }
             elseif ($UseProfile) {
-                $profileName = "$accountName.$($credential.RoleName)"
+                $profileName = "$($account.AccountName).$($credential.RoleName)"
                 $setAwsCredentialParms = @{
                     StoreAs      = $profileName
                     AccessKey    = $credential.AccessKey
