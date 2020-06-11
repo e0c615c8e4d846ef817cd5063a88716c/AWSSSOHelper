@@ -176,7 +176,7 @@ function Get-AWSSSORoleCredential {
     }
 
     if (Get-Module -Name $awsPowerShellModuleName -ListAvailable) {
-        Import-Module -Name $awsPowerShellModuleName
+        Import-Module -Name $awsPowerShellModuleName -Verbose:$false
     }
 
     if ($Region) {
@@ -315,7 +315,7 @@ function Get-AWSSSORoleCredential {
 
         foreach ($credential in $credentials) {
             if ($OutputAwsCredential) {
-                Write-Verbose -Message 'Returning the credentials as an Amazon.Runtime.SessionAWSCredentials object'
+                Write-Verbose -Message 'Outputting the credentials as an Amazon.Runtime.SessionAWSCredentials object'
                 New-AWSCredential -AccessKey $credential.AccessKey -SecretKey $credential.SecretKey `
                     -SessionToken $credential.SessionToken -Verbose:$false
             }
@@ -357,7 +357,7 @@ function Get-AWSSSORoleCredential {
                 $env:AWS_SESSION_TOKEN = $credential.SessionToken
             }
             else {
-                Write-Verbose -Message "Returning the Credentials as a PSCustomObject"
+                Write-Verbose -Message "Outputting the Credentials as a PSCustomObject"
                 $credential
             }
         }
