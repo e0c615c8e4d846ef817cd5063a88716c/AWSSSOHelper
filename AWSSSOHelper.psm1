@@ -264,14 +264,14 @@ function Get-AWSSSORoleCredential {
 
     }
 
-        try {
+    try {
         $awsAccounts = Get-SSOAccountList -AccessToken $AccessToken.AccessToken `
-                -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
-        }
-        catch {
-            throw ("Error obtaining account list, access token is invalid.  Try running the command again with " +
-                "'-RefreshAccessToken' parameter.")
-        }
+            -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
+    }
+    catch {
+        throw ("Error obtaining account list, access token is invalid.  Try running the command again with " +
+            "'-RefreshAccessToken' parameter.")
+    }
 
     if (!$AccountId) {
         if (!$AllAccountRoles) {
@@ -298,21 +298,6 @@ function Get-AWSSSORoleCredential {
     foreach ($account in $accounts) {
         $credentials = GetAccountRoleCredential -AccountId $account.AccountId -AccessToken $AccessToken.AccessToken `
             -RoleName $RoleName -AllAccountRoles:$AllAccountRoles
-
-        if ($UseProfile) {
-            try {
-                $getIamAccountAliasParms = @{
-                    AccessKey    = $credentials[0].AccessKey
-                    SecretKey    = $credentials[0].SecretKey
-                    SessionToken = $credentials[0].SessionToken
-                    Verbose      = $false
-                }
-                $accountName = Get-IamAccountAlias @getIamAccountAliasParms
-            }
-            catch {
-                $accountName = $accountId
-            }
-        }
 
         foreach ($credential in $credentials) {
             if ($OutputAwsCredential) {
@@ -396,7 +381,7 @@ function GetAccountRoleCredential {
     foreach ($role in $AccountRoles -split ' ') {
         $SSORoleCredential = Get-SSORoleCredential -AccessToken $AccessToken -AccountId $AccountId -RoleName $role `
             -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
-    
+
         $SSOAccountName = (Get-SSOAccountList -AccessToken $AccessToken `
             -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false |
                 Where-Object -Property AccountId -EQ $AccountID).AccountName
