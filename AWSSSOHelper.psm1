@@ -252,7 +252,7 @@ function Get-AWSSSORoleCredential {
                 $AccessToken = New-SSOOIDCToken @newSSOIDCTokenParms
             }
             catch {
-                Write-Debug ($_.Exception.GetType().FullName, $_.Exception.Message)
+                Write-Debug -Message ($_.Exception.GetType().FullName, $_.Exception.Message | Out-String)
                 Start-Sleep -Seconds 5
             }
         }
