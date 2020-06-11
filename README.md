@@ -9,6 +9,7 @@ The output options of the credentials can be selected from the following options
 - Output as an array of PSCustomObjects with the following properties: AccountId, RoleName, AccessKey, Expiration, SecretKey, SessionToken.
 - Output as an array of hashtables with the following keys: AccessKey, SecretKey, SessionToken. for splatting input to AWS PowerShell cmdlets.
 - Output as an `Amazon.Runtime.SessionAWSCredentials` object for input to the `Credential` parameter of AWS PowerShell cmdlets.
+- Output to the `$StoredAWSCredentials` shell variable for use by AWS PowerShell cmdlets.
 - Written as profiles to the AWS SDK .NET encrypted credential file used by the AWS PowerShell cmdlets with a naming convention of `<AccountName>.<RoleName>`.
 - Written as profiles to the AWS CLI ini-format credential file with a naming convention of `<AccountName>.<RoleName>`.
 - Written to the AWS CLI environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` for use by the AWS CLI and other compatible tooling (Terraform, Sceptre).
