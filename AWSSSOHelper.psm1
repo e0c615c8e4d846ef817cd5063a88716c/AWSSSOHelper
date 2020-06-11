@@ -113,6 +113,7 @@ function Get-AWSSSORoleCredential {
         [Parameter(ParameterSetName = 'UseStoredAwsCredentials')]
         [Parameter(ParameterSetName = 'UseProfile')]
         [Parameter(ParameterSetName = 'OutputEnvVariables')]
+        [Parameter(ParameterSetName = 'UseProfileAllAccountRoles')]
         [string]$AccountId,
 
         [Parameter(ParameterSetName = 'OutputPSObject')]
@@ -123,40 +124,45 @@ function Get-AWSSSORoleCredential {
         [string]$RoleName,
 
         [Parameter(ParameterSetName = 'OutputPSObject')]
-        [Parameter(ParameterSetName = 'UseProfile')]
+        [Parameter(ParameterSetName = 'UseProfileAllAccountRoles')]
         [switch]$AllAccountRoles,
 
         [Parameter()]
         [switch]$RefreshAccessToken,
 
         [Parameter()]
-        [String]$Region,
+        [string]$Region,
 
         [Parameter(ParameterSetName = 'OutputPSObject')]
-        [Switch]$PassThru,
+        [switch]$PassThru,
 
         [Parameter()]
-        [String]$ClientName = "default",
+        [string]$ClientName = "default",
 
         [Parameter()]
         [int]$TimeoutInSeconds = 120,
 
         [Parameter()]
-        [String]$Path = (Join-Path $Home ".awsssohelper"),
+        [string]$Path = (Join-Path $Home ".awsssohelper"),
 
         [Parameter(ParameterSetName = 'OutputAwsCredential')]
-        [Switch]$OutputAwsCredential,
+        [switch]$OutputAwsCredential,
 
         [Parameter(ParameterSetName = 'UseStoredAwsCredentials')]
-        [Switch]$UseStoredAwsCredentials,
+        [switch]$UseStoredAwsCredentials,
 
         [Parameter(ParameterSetName = 'UseProfile')]
-        [Switch]$UseProfile,
+        [Parameter(ParameterSetName = 'UseProfileAllAccountRoles')]
+        [switch]$UseProfile,
 
         [Parameter(ParameterSetName = 'UseProfile')]
-        [Switch]$UseCliCredentialFile,
+        [Parameter(ParameterSetName = 'UseProfileAllAccountRoles')]
+        [switch]$UseCliCredentialFile,
 
         [Parameter(ParameterSetName = 'UseProfile')]
+        [Parameter(ParameterSetName = 'UseProfileAllAccountRoles')]
+        [string]$ProfileLocation = "$HOME\.aws\credentials",
+
         [Parameter(ParameterSetName = 'OutputEnvVariables')]
         [switch]$OutputEnvVariables
     )
