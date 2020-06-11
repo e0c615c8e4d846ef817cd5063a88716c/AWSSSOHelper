@@ -218,7 +218,7 @@ function Get-AWSSSORoleCredential {
 
     if ($RefreshAccessToken) {
 
-        $Client = Register-SSOOIDCClient -ClientName $ClientName -ClientType $ClientType `
+        $Client = Register-SSOOIDCClient -ClientName $ClientName -ClientType 'Public' `
             -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
         $DeviceAuth = Start-SSOOIDCDeviceAuthorization -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret `
             -StartUrl $StartUrl -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
