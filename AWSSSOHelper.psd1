@@ -15,7 +15,7 @@ RootModule = 'AWSSSOHelper.psm1'
 ModuleVersion = '0.0.21'
 
 # Supported PSEditions
-CompatiblePSEditions = @('Core')
+CompatiblePSEditions = @('Core','Desktop')
 
 # ID used to uniquely identify this module>
 GUID = '4116f348-ea11-47fb-95ec-a624dcf70754'
@@ -37,7 +37,7 @@ https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper
 '@
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '6.0'
+PowerShellVersion = '5.1'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -99,13 +99,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('AWS', 'SSO')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper/blob/master/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper'
 
         # A URL to an icon representing this module.
         # IconUri = ''
