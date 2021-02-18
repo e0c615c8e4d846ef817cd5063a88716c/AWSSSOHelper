@@ -1,5 +1,12 @@
 # Change log for AWSSSOHelper
 
+## [0.0.24]
+
+### Changed
+
+- Fixed bug with macOS
+  ([issue #7](https://github.com/e0c615c8e4d846ef817cd5063a88716c/AWSSSOHelper/issues/7)).
+
 ## [0.0.23]
 
 ### Changed

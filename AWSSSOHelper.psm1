@@ -167,7 +167,7 @@ function Get-AWSSSORoleCredential {
 
         [Parameter(ParameterSetName = 'UseProfile')]
         [Parameter(ParameterSetName = 'UseProfileAllAccountRoles')]
-        [string]$ProfileLocation = "$HOME\.aws\credentials",
+        [string]$ProfileLocation = (Join-Path (Join-Path $HOME ".aws") "credentials"),
 
         [Parameter(ParameterSetName = 'OutputEnvVariables')]
         [switch]$OutputEnvVariables
