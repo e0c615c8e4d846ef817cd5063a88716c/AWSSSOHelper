@@ -347,6 +347,9 @@ function Get-AWSSSORoleCredential {
                 $env:AWS_ACCESS_KEY_ID = $credential.AccessKey
                 $env:AWS_SECRET_ACCESS_KEY = $credential.SecretKey
                 $env:AWS_SESSION_TOKEN = $credential.SessionToken
+                "export AWS_ACCESS_KEY_ID=$($credential.AccessKey)"
+                "export AWS_SECRET_ACCESS_KEY=$($credential.SecretKey)"
+                "export AWS_SESSION_TOKEN=$($credential.SessionToken)"
             }
             else {
                 Write-Verbose -Message 'Outputting the Credentials as a PSCustomObject'

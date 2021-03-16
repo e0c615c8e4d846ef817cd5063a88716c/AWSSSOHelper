@@ -1,5 +1,11 @@
 # Change log for AWSSSOHelper
 
+## [0.0.25]
+
+### Changed
+
+- Updated behaviour for -OutputEnvVariables to enable piping to e.g. 'eval -' for use with cli.
+
 ## [0.0.24]
 
 ### Changed
