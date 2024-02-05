@@ -202,33 +202,32 @@ function Get-AWSSSORoleCredential {
         New-Item -Path $Path -ItemType Directory | Out-Null
     }
 
+    # Intialize $RefreshAccessToken = $true because the default should be to obtain a new access token 
+    $RefreshAccessToken = $true
     if (Test-Path $CachePath) {
-        $AccessToken = Get-Content $CachePath -ErrorAction SilentlyContinue | ConvertFrom-Json
+        $SSOCredentials = Get-Content $CachePath -ErrorAction SilentlyContinue | ConvertFrom-Json
+        $SSOCredentials.AccessToken
         try {
-            Get-SSOAccountList -AccessToken $AccessToken.AccessToken `
+            Get-SSOAccountList -AccessToken $SSOCredentials.AccessToken.AccessToken `
                 -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false | Out-Null
         }
         catch {
-            Write-Host 'Cached access token is no longer valid, will need to obtain via SSO.'
-            $RefreshAccessToken = $true
+            Write-Host 'Cannot retrieve a cached access token. A new access token will be obtained via SSO.'
         }
     }
 
-    if (!$AccessToken) {
-        $RefreshAccessToken = $true
-    }
-    elseif ((New-TimeSpan $AccessToken.LoggedAt (Get-Date)).TotalMinutes -gt $AccessToken.ExpiresIn) {
-        $RefreshAccessToken = $true
-        Clear-Variable AccessToken
+    if ($SSOCredentials.Expiration) {
+        if ((Get-Date) -lt $SSOCredentials.Expiration) {
+            $RefreshAccessToken = $false
+            # Clear-Variable AccessToken
+        }
     }
 
     if ($RefreshAccessToken) {
 
-        $Client = Register-SSOOIDCClient -ClientName $ClientName -ClientType $ClientType `
-            -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
-        $DeviceAuth = Start-SSOOIDCDeviceAuthorization -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret `
-            -StartUrl $StartUrl -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
-
+        $Client = Register-SSOOIDCClient -ClientName $ClientName -ClientType $ClientType -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
+        $DeviceAuth = Start-SSOOIDCDeviceAuthorization -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -StartUrl $StartUrl -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
+        Write-Host ("Only confirm in the browser if the code displayed in the browser matches this code: {0}" -f $DeviceAuth.UserCode)
         try {
             $Process = Start-Process $DeviceAuth.VerificationUriComplete -PassThru
         }
@@ -245,7 +244,7 @@ function Get-AWSSSORoleCredential {
         Write-Host 'Waiting for SSO login via browser...'
         $SSOStart = Get-Date
         
-        while (!$AccessToken -and ((New-TimeSpan $SSOStart (Get-Date)).TotalSeconds -lt $TimeoutInSeconds)) {
+        while (!$SSOCredentials.AccessToken -and ((New-TimeSpan $SSOStart (Get-Date)).TotalSeconds -lt $TimeoutInSeconds)) {
             try {
                 $newSSOIDCTokenParms = @{
                     ClientId     = $Client.ClientId
@@ -256,22 +255,27 @@ function Get-AWSSSORoleCredential {
                     Credential   = ([Amazon.Runtime.AnonymousAWSCredentials]::new())
                 }
                 $AccessToken = New-SSOOIDCToken @newSSOIDCTokenParms
+                # Create a custom object to store the AWS Access Token along with an Expiration timestamp
+                $SSOCredentials = New-Object PSCustomObject @{
+                    AccessToken = $AccessToken
+                    Expiration = (Get-Date).AddSeconds($AccessToken.ExpiresIn)
+                }
             }
             catch {
                 Write-Debug -Message ($_.Exception.GetType().FullName, $_.Exception.Message | Out-String)
                 Start-Sleep -Seconds 5
             }
         }
-        if (!$AccessToken) {
+        if (!$SSOCredentials.AccessToken) {
             throw 'No access token obtained, exiting.'
         }
         
-        $AccessToken | ConvertTo-Json | Set-Content $CachePath
+        $SSOCredentials | ConvertTo-Json -Depth 10 | Set-Content $CachePath
 
     }
 
     try {
-        $awsAccounts = Get-SSOAccountList -AccessToken $AccessToken.AccessToken `
+        $awsAccounts = Get-SSOAccountList -AccessToken $SSOCredentials.AccessToken.AccessToken `
             -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
     }
     catch {
@@ -302,7 +306,7 @@ function Get-AWSSSORoleCredential {
     }
 
     foreach ($account in $accounts) {
-        $credentials = GetAccountRoleCredential -AccountId $account.AccountId -AccessToken $AccessToken.AccessToken `
+        $credentials = GetAccountRoleCredential -AccountId $account.AccountId -AccessToken $SSOCredentials.AccessToken.AccessToken `
             -RoleName $RoleName -AllAccountRoles:$AllAccountRoles
 
         foreach ($credential in $credentials) {
