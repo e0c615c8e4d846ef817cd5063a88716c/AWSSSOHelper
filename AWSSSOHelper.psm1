@@ -210,7 +210,7 @@ function Get-AWSSSORoleCredential {
             Write-Host 'Access token is null. A new access token will be obtained via SSO.'
         } else {
             try {
-                Get-SSOAccountList -AccessToken $SSOCredentials.AWSToken.AccessToken `
+                $accountList = Get-SSOAccountList -AccessToken $SSOCredentials.AWSToken.AccessToken `
                     -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false | Out-Null
             }
             catch {
@@ -219,13 +219,17 @@ function Get-AWSSSORoleCredential {
         }
     }
 
-    if ($SSOCredentials.Expiration) {
+    if (($null -ne $SSOCredentials.Expiration) -and ($null -ne $accountList)) {
         if ((Get-Date) -lt $SSOCredentials.Expiration) {
             $RefreshAccessToken = $false
         }
     }
 
     if ($RefreshAccessToken) {
+        if ($null -ne $SSOCredentials.AWSToken) {
+            # Clear cached data because token needs to be refreshed
+            Clear-Variable SSOCredentials
+        }
 
         $Client = Register-SSOOIDCClient -ClientName $ClientName -ClientType $ClientType -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
         $DeviceAuth = Start-SSOOIDCDeviceAuthorization -ClientId $Client.ClientId -ClientSecret $Client.ClientSecret -StartUrl $StartUrl -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new())
