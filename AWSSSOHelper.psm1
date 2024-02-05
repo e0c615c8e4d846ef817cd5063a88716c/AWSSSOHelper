@@ -206,20 +206,22 @@ function Get-AWSSSORoleCredential {
     $RefreshAccessToken = $true
     if (Test-Path $CachePath) {
         $SSOCredentials = Get-Content $CachePath -ErrorAction SilentlyContinue | ConvertFrom-Json
-        $SSOCredentials.AccessToken
-        try {
-            Get-SSOAccountList -AccessToken $SSOCredentials.AccessToken.AccessToken `
-                -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false | Out-Null
-        }
-        catch {
-            Write-Host 'Cannot retrieve a cached access token. A new access token will be obtained via SSO.'
+        if ($null -eq $SSOCredentials.AWSToken.AccessToken) {
+            Write-Host 'Access token is null. A new access token will be obtained via SSO.'
+        } else {
+            try {
+                Get-SSOAccountList -AccessToken $SSOCredentials.AWSToken.AccessToken `
+                    -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false | Out-Null
+            }
+            catch {
+                Write-Host 'Cannot retrieve a cached access token. A new access token will be obtained via SSO.'
+            }
         }
     }
 
     if ($SSOCredentials.Expiration) {
         if ((Get-Date) -lt $SSOCredentials.Expiration) {
             $RefreshAccessToken = $false
-            # Clear-Variable AccessToken
         }
     }
 
@@ -240,11 +242,10 @@ function Get-AWSSSORoleCredential {
             Write-Host -ForegroundColor White "$($DeviceAuth.VerificationUriComplete)`r`n"
         }
         
-        Clear-Variable AccessToken -ErrorAction SilentlyContinue
         Write-Host 'Waiting for SSO login via browser...'
         $SSOStart = Get-Date
         
-        while (!$SSOCredentials.AccessToken -and ((New-TimeSpan $SSOStart (Get-Date)).TotalSeconds -lt $TimeoutInSeconds)) {
+        while (!$SSOCredentials.AWSToken -and ((New-TimeSpan $SSOStart (Get-Date)).TotalSeconds -lt $TimeoutInSeconds)) {
             try {
                 $newSSOIDCTokenParms = @{
                     ClientId     = $Client.ClientId
@@ -254,11 +255,11 @@ function Get-AWSSSORoleCredential {
                     GrantType    = 'urn:ietf:params:oauth:grant-type:device_code'
                     Credential   = ([Amazon.Runtime.AnonymousAWSCredentials]::new())
                 }
-                $AccessToken = New-SSOOIDCToken @newSSOIDCTokenParms
+                $AWSToken = New-SSOOIDCToken @newSSOIDCTokenParms
                 # Create a custom object to store the AWS Access Token along with an Expiration timestamp
                 $SSOCredentials = New-Object PSCustomObject @{
-                    AccessToken = $AccessToken
-                    Expiration = (Get-Date).AddSeconds($AccessToken.ExpiresIn)
+                    AWSToken = $AWSToken
+                    Expiration = (Get-Date).AddSeconds($AWSToken.ExpiresIn)
                 }
             }
             catch {
@@ -266,7 +267,7 @@ function Get-AWSSSORoleCredential {
                 Start-Sleep -Seconds 5
             }
         }
-        if (!$SSOCredentials.AccessToken) {
+        if (!$SSOCredentials.AWSToken) {
             throw 'No access token obtained, exiting.'
         }
         
@@ -275,7 +276,7 @@ function Get-AWSSSORoleCredential {
     }
 
     try {
-        $awsAccounts = Get-SSOAccountList -AccessToken $SSOCredentials.AccessToken.AccessToken `
+        $awsAccounts = Get-SSOAccountList -AccessToken $SSOCredentials.AWSToken.AccessToken `
             -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
     }
     catch {
@@ -306,7 +307,7 @@ function Get-AWSSSORoleCredential {
     }
 
     foreach ($account in $accounts) {
-        $credentials = GetAccountRoleCredential -AccountId $account.AccountId -AccessToken $SSOCredentials.AccessToken.AccessToken `
+        $credentials = GetAccountRoleCredential -AccountId $account.AccountId -AccessToken $SSOCredentials.AWSToken.AccessToken `
             -RoleName $RoleName -AllAccountRoles:$AllAccountRoles
 
         foreach ($credential in $credentials) {
