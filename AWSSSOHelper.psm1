@@ -210,11 +210,10 @@ function Get-AWSSSORoleCredential {
             Write-Host 'Access token is null. A new access token will be obtained via SSO.'
         } else {
             try {
-                $accountList = Get-SSOAccountList -AccessToken $SSOCredentials.AWSToken.AccessToken `
-                    -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false | Out-Null
+                $accountList = Get-SSOAccountList -AccessToken $SSOCredentials.AWSToken.AccessToken -Credential ([Amazon.Runtime.AnonymousAWSCredentials]::new()) -Verbose:$false
             }
             catch {
-                Write-Host 'Cannot retrieve a cached access token. A new access token will be obtained via SSO.'
+                Write-Host 'Cached access token appears to be invalid. A new access token will be obtained via SSO.'
             }
         }
     }
