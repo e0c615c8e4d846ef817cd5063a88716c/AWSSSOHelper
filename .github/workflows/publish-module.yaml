@@ -1,0 +1,19 @@
+name: Publish PowerShell Module
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+
+    - name: Publish to PowerShell Gallery
+      shell: pwsh
+      run: |
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Publish-Module -Path '.' -NuGetApiKey ${{ secrets.PS_GALLERY_API_KEY }} -ErrorAction Stop

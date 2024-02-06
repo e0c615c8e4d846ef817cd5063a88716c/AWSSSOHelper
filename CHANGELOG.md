@@ -1,5 +1,16 @@
 # Change log for AWSSSOHelper
 
+## [0.0.26] (shout out to @SiloReed)
+
+### Changed
+
+- Improvements to the token expiration logic
+
+### Fixed
+
+- Bug after cached credential expired
+- Removed out-null from Get-SSOAccountList
+
 ## [0.0.25]
 
 ### Changed
